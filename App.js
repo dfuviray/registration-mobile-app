@@ -1,113 +1,81 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
- */
+import React, {useState} from 'react';
+import {SafeAreaView, StyleSheet, StatusBar} from 'react-native';
+import {NavigationContainer} from '@react-navigation/native';
 
-import React from 'react';
-import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  View,
-  Text,
-  StatusBar,
-} from 'react-native';
+import RegisterContext from './app/context/RegisterContext';
+import RegisterStack from './app/navigation/RegistrationStack';
 
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+const App = () => {
+  const [data, setData] = useState([
+    {
+      id: 1,
+      name: 'John Doe',
+      email: 'john@domain.com',
+      password: '12345aA',
+      type: 'registered',
+      sms: '+6391254687154',
+      user_last_login: null,
+    },
+    {
+      id: 2,
+      name: 'Kevin Dave',
+      email: 'kevin@domain.com',
+      password: '12345aA',
+      type: 'suspended',
+      sms: '+6391254687154',
+      user_last_login: null,
+    },
+  ]);
 
-const App: () => React$Node = () => {
+  const handleGetData = (user) => {
+    const result = data.find((d) => d.email == user.email);
+    console.log(data);
+    return result;
+  };
+
+  const handleAddData = (userData) => {
+    const user = handleGetData(userData);
+    if (user) return false;
+
+    setData([...data, {id: data.count + 1, ...userData}]);
+
+    return true;
+  };
+
+  const handleSignIn = (userData) => {
+    const result = data.find(
+      (d) => d.email == userData.email && d.password == userData.password,
+    );
+
+    if (!result) return 'Email or Password is incorrect';
+
+    if (result.type == 'suspended') return 'Account is suspended';
+
+    if (result.type == 'notverified') return 'Please verify your account';
+
+    return 'Successfully login';
+  };
+
   return (
-    <>
-      <StatusBar barStyle="dark-content" />
-      <SafeAreaView>
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          style={styles.scrollView}>
-          <Header />
-          {global.HermesInternal == null ? null : (
-            <View style={styles.engine}>
-              <Text style={styles.footer}>Engine: Hermes</Text>
-            </View>
-          )}
-          <View style={styles.body}>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Step One</Text>
-              <Text style={styles.sectionDescription}>
-                Edit <Text style={styles.highlight}>App.js</Text> to change this
-                screen and then come back to see your edits.
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>See Your Changes</Text>
-              <Text style={styles.sectionDescription}>
-                <ReloadInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Debug</Text>
-              <Text style={styles.sectionDescription}>
-                <DebugInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Learn More</Text>
-              <Text style={styles.sectionDescription}>
-                Read the docs to discover what to do next:
-              </Text>
-            </View>
-            <LearnMoreLinks />
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </>
+    <RegisterContext.Provider
+      value={{
+        value: data,
+        onhandleAddData: handleAddData,
+        onhandleSignIn: handleSignIn,
+      }}>
+      <NavigationContainer>
+        <StatusBar barStyle="dark-content" />
+        <SafeAreaView style={styles.container}>
+          <RegisterStack />
+        </SafeAreaView>
+      </NavigationContainer>
+    </RegisterContext.Provider>
   );
 };
 
 const styles = StyleSheet.create({
-  scrollView: {
-    backgroundColor: Colors.lighter,
-  },
-  engine: {
-    position: 'absolute',
-    right: 0,
-  },
-  body: {
-    backgroundColor: Colors.white,
-  },
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: Colors.black,
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-    color: Colors.dark,
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-  footer: {
-    color: Colors.dark,
-    fontSize: 12,
-    fontWeight: '600',
-    padding: 4,
-    paddingRight: 12,
-    textAlign: 'right',
+  container: {
+    flex: 1,
   },
 });
 
